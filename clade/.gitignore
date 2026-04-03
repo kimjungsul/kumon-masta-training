@@ -1,0 +1,15 @@
+# 로컬 전용 설정
+.claude/settings.local.json
+
+# 민감한 정보
+.env
+*.key
+*.pem
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.log
