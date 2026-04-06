@@ -187,6 +187,62 @@ TEACHER_SUMMARY = [
 ]
 
 # ──────────────────────────────────────────
+# 교사별 요일/시간별 회원 스케줄
+#
+# 형식:
+#   SCHEDULE[교사명][요일] = [
+#       {"시간": "HH:MM", "회원번호": "YY-NNNNNNN", "과목코드": N, "관리수": N, "백점이": True/False},
+#       ...
+#   ]
+#
+# 회원번호 형식: 가입연도 2자리 - 7자리 번호  (예: 23-0119277)
+# 과목코드: SUBJECT_MAP 키값 사용
+# 관리수: 해당 과목 주간 관리 횟수
+# 백점이: ★ 표시 여부 (True = 백점이회원)
+# ──────────────────────────────────────────
+
+DAYS = ["월", "화", "수", "목", "금", "토"]
+
+SCHEDULE = {
+    "원희선": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "신인숙": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "김은숙": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "최승희": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "이경옥": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "이경이": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "이현주": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "김주연": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "박양희": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "이주아": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+    "김태연": {"월": [], "화": [], "수": [], "목": [], "금": [], "토": []},
+}
+
+def add_slot(teacher, day, time, member_no, subject_code, count=1, star=False):
+    """스케줄에 회원 1명 추가"""
+    SCHEDULE[teacher][day].append({
+        "시간":     time,
+        "회원번호": member_no,
+        "과목코드": subject_code,
+        "과목명":   SUBJECT_MAP.get(subject_code, "?"),
+        "관리수":   count,
+        "백점이":   star,
+    })
+
+def get_time_slots(teacher, day, time):
+    """특정 교사/요일/시간대 회원 목록"""
+    return [s for s in SCHEDULE[teacher][day] if s["시간"] == time]
+
+def get_all_at_time(time):
+    """전 교사 중 특정 시간대 회원 목록"""
+    result = {}
+    for t in SCHEDULE:
+        for d in DAYS:
+            slots = get_time_slots(t, d, time)
+            if slots:
+                result.setdefault(t, {}).setdefault(d, []).extend(slots)
+    return result
+
+# ──────────────────────────────────────────
 # 빠른 조회
 # ──────────────────────────────────────────
 
@@ -196,6 +252,9 @@ def get(name):
     return TEACHER_MAP.get(name, None)
 
 if __name__ == "__main__":
+    import sys; sys.stdout.reconfigure(encoding="utf-8")
     print(f"저장된 교사 수: {len(TEACHER_SUMMARY)}명\n")
     for t in TEACHER_SUMMARY:
         print(f"  {t['이름']:5s} | 코드 {t['코드']} | 승률 {t['승률']}% | 누적승률 {t['누적승률']}")
+    print(f"\n과목 코드: {len(SUBJECT_MAP)}개")
+    print(f"스케줄 구조: {list(SCHEDULE.keys())}")
